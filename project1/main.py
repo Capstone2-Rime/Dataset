@@ -8,7 +8,7 @@ url = 'C:/Users/이윤정/Desktop/캡디/참고파일/3조 최종데모 발표 �
 
 if os.path.splitext(url)[1]=='.pdf':
     text = pdft.read_pdf_PDFMINER(url)
-    print('filename extension: .ppf')   
+    print('filename extension: .pdf')   
 elif os.path.splitext(url)[1]=='.pptx':
     text = pptt.read_ppt(url)
     print('filename extenstion: .pptx')
@@ -16,6 +16,6 @@ else:
     print("error: unknown filename extension")
 
 #위치는 나중에 변경할 것
-f = open("C:/Users/이윤정/Desktop/new.txt", 'w')
+f = open("C:/Users/이윤정/Desktop/new.txt", 'w', encoding='UTF-8')
 f.write(text)
 f.close()
