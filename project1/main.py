@@ -12,9 +12,15 @@ import time
 #kiwi = Kiwi()
 
 # url은 언젠가 업로드되는 주소로 바뀔 것임!
-url = 'C:/Users/이윤정/Desktop/캡디/참고파일/3조 최종데모 발표 자료.pptx'
+# url = 'C:/Users/이윤정/Desktop/캡디/참고파일/3조 최종데모 발표 자료.pptx'
 # url = 'C:/Users/이윤정/Desktop/캡디/사이보그가 되다.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/정보시스템_final.pdf'
+# url = 'C:/Users/이윤정/Desktop/캡디/문헌정보강의.pdf'
+# url = 'C:/Users/이윤정/Desktop/캡디/생명과학.pdf'
+# url = 'C:/Users/이윤정/Desktop/캡디/예술.pdf'
+# url = 'C:/Users/이윤정/Desktop/캡디/캡디라임4주발표.pptx'
+# url = 'C:/Users/이윤정/Desktop/캡디/경영.pdf'
+url = 'C:/Users/이윤정/Desktop/캡디/광홍_논문.pdf'
+# url = 'C:/Users/이윤정/Desktop/캡디/광홍_강의자료.pdf'
 # url = '/media/sf_Share/testpdf.pdf'
 
 if os.path.splitext(url)[1]=='.pdf':
