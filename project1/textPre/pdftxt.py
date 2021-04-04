@@ -19,4 +19,5 @@ def read_pdf_PDFMINER(pdf_file_path):
         for page in PDFPage.create_pages(doc):
             interpreter.process_page(page)
     v = str(output_string.getvalue())
-    return ' '.join(v.split())
+    text = ' '.join(v.split())
+    return text
