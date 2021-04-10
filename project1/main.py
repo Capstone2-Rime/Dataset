@@ -3,62 +3,62 @@ import textPre.ppttxt as pptt
 import textPre.extprocess as prc
 import os
 import time
-#from konlpy.tag import Mecab
-#from konlpy.tag import Okt
-#from kiwipiepy import Kiwi, Option
-#start = time.time()
-#mecab = Mecab()
-#okt = Okt()
-#kiwi = Kiwi()
+import pickle
+from konlpy.tag import Mecab
+# start = time.time()
+mecab = Mecab()
 
 # url은 언젠가 업로드되는 주소로 바뀔 것임!
 # url = 'C:/Users/이윤정/Desktop/캡디/참고파일/3조 최종데모 발표 자료.pptx'
 # url = 'C:/Users/이윤정/Desktop/캡디/사이보그가 되다.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/문헌정보강의.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/생명과학.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/예술.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/캡디라임4주발표.pptx'
-# url = 'C:/Users/이윤정/Desktop/캡디/경영.pdf'
-url = 'C:/Users/이윤정/Desktop/캡디/광홍_논문.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/광홍_강의자료.pdf'
-# url = '/media/sf_Share/testpdf.pdf'
+url = '/media/sf_Share/경영.pdf'
 
 if os.path.splitext(url)[1]=='.pdf':
     text = pdft.read_pdf_PDFMINER(url)
-    #print('filename extension: .pdf')   
+    print('filename extension: .pdf')   
 elif os.path.splitext(url)[1]=='.pptx':
     text = pptt.read_ppt(url)
-    #print('filename extenstion: .pptx')
+    print('filename extenstion: .pptx')
 else:
     print("error: unknown filename extension")
 
 text = prc.clean_txt(text)
 #text = prc.check_spell(text)
 
-#위치는 나중에 변경할 것
-f = open("C:/Users/이윤정/Desktop/new.txt", 'w', encoding='UTF-8')
-f.write(text)
-f.close()
+# TEXT 저장
+#f = open("C:/Users/이윤정/Desktop/new.txt", 'w', encoding='UTF-8')
+#f.write(text)
+#f.close()
 
+pos = mecab.pos(text)
+noun_nn = []
+noun_foB = []
+tag_nn = ['NNG','NNP', 'SH']
+for i in pos:
+	if i[1] in tag_nn:
+		noun_nn.append(i[0])
+	elif i[1]=='SL':
+		noun_foB.append(i[0])
+# 2글자 이하의 영어 제거
+noun_fo = []
+for i in noun_foB:
+	if len(i)>2:
+		noun_fo.append(i)
+#print(noun_nn)
+#print('\n')
+#print(noun_fo)
 
-#print(mecab.pos(text))
-#print(okt.pos(text))
 # mecab
-# f = open("/home/yunjung/capstone_kor/new.txt", 'w')
-# f.write('\n'.join(mecab.morphs(text)))
-# f.write('time :'+str(time.time()-start))
-# f.close()
-# twt
-# f = open("/home/yunjung/capstone_kor/new_twt.txt", 'w')
-# f.write('\n'.join(okt.morphs(text)))
-# f.write('\ntime :'+str(time.time()-start))
-# print('time :', time.time()-start)
-# f.close()
-# kiwi
-# kiwi.prepare()
-# a = kiwi.analyze(text)
-# print(a)
-# f = open("/home/yunjung/capstone_kor/new_kiwi.txt", 'w')
-# f.write('time :'+str(time.time()-start))
-# print('time:', time.time()-start)
-# f.close()
+#print(mecab.nouns('한국은 예로부터 tradition을 重視해왔다. 利花가 아름답다. AK 플라자에 가고 싶다. 그녀는 그 일에 대해서 이루 말할 수 없이 슬펐다. 그들은 무엇도, 단 한 개도 제공하지 않았다. 첫째로, 애나는 미국행 비행기 티켓을 끊었다.'))
+f = open("/home/yunjung/capstone_kor/mecab_nn.txt", 'w')
+f.write(", ".join(noun_nn))
+f.close()
+f = open("/home/yunjung/capstone_kor/mecab_fo.txt", 'w')
+f.write(', '.join(noun_fo))
+f.close()
+# nouns 시간 계산해서 알아보기
+#f = open("/home/yunjung/capstone_kor/mecabnoun.txt", 'w')
+#f.write('\n'.join(mecab.nouns(text)))
+#f.close()
+
+
