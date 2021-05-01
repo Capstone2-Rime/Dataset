@@ -4,14 +4,14 @@ import textPre.extprocess as prc
 import os
 import time
 import pickle
+import pandas as pd
 from konlpy.tag import Mecab
+import json
 # start = time.time()
 mecab = Mecab()
 
-# url은 언젠가 업로드되는 주소로 바뀔 것임!
-# url = 'C:/Users/이윤정/Desktop/캡디/참고파일/3조 최종데모 발표 자료.pptx'
-# url = 'C:/Users/이윤정/Desktop/캡디/사이보그가 되다.pdf'
-url = '/media/sf_Share/경영.pdf'
+# url은 업로드되는 파일  주소
+url = '/media/sf_Share/testpdf.pdf'
 
 if os.path.splitext(url)[1]=='.pdf':
     text = pdft.read_pdf_PDFMINER(url)
@@ -29,33 +29,45 @@ text = prc.clean_txt(text)
 #f = open("C:/Users/이윤정/Desktop/new.txt", 'w', encoding='UTF-8')
 #f.write(text)
 #f.close()
+stopfile = '/media/sf_Share/stopword_ko.csv'
+stopdata = pd.read_csv(stopfile)
+stopset = list(stopdata.stopword)
+#print(list(stopdata.stopword))
 
 pos = mecab.pos(text)
+vocab_ko = {}
+
 noun_nn = []
-noun_foB = []
-tag_nn = ['NNG','NNP', 'SH']
+noun_fo = []
+tag_nn = ['NNG','NNP']
+
 for i in pos:
 	if i[1] in tag_nn:
+		if i[0] in stopset:
+			continue
 		noun_nn.append(i[0])
+		if i[0] not in vocab_ko:
+			vocab_ko[i[0]] = 0
+		vocab_ko[i[0]] += 1
 	elif i[1]=='SL':
-		noun_foB.append(i[0])
-# 2글자 이하의 영어 제거
-noun_fo = []
-for i in noun_foB:
-	if len(i)>2:
-		noun_fo.append(i)
-#print(noun_nn)
-#print('\n')
-#print(noun_fo)
+		if len(i[0])>2:
+			noun_fo.append(i[0])
+vocab_ko = sorted(vocab_ko.items(), key =lambda x: x[1], reverse=True)
+#print(vocab_ko)
 
 # mecab
-#print(mecab.nouns('한국은 예로부터 tradition을 重視해왔다. 利花가 아름답다. AK 플라자에 가고 싶다. 그녀는 그 일에 대해서 이루 말할 수 없이 슬펐다. 그들은 무엇도, 단 한 개도 제공하지 않았다. 첫째로, 애나는 미국행 비행기 티켓을 끊었다.'))
 f = open("/home/yunjung/capstone_kor/mecab_nn.txt", 'w')
 f.write(", ".join(noun_nn))
 f.close()
 f = open("/home/yunjung/capstone_kor/mecab_fo.txt", 'w')
 f.write(', '.join(noun_fo))
 f.close()
+f = open("/home/yunjung/capstone_kor/vocab_rank.txt", 'w')
+for k, v in vocab_ko:
+	f.write(str(k) + ' : ' + str(v)+'\n')
+f.close()
+
+
 # nouns 시간 계산해서 알아보기
 #f = open("/home/yunjung/capstone_kor/mecabnoun.txt", 'w')
 #f.write('\n'.join(mecab.nouns(text)))
