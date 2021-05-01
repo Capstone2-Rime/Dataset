@@ -8,7 +8,6 @@ import pandas as pd
 from konlpy.tag import Mecab
 import json
 # start = time.time()
-mecab = Mecab()
 
 def openFile(url):
 	if os.path.splitext(url)[1]=='.pdf':
@@ -34,6 +33,7 @@ def getStopwords():
 	return stopset
 
 def getWords(text):
+	mecab = Mecab()
 	pos = mecab.pos(text)
 	vocab_ko = {}
 	noun_nn = []
