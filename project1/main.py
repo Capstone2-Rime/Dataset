@@ -11,13 +11,13 @@ import json
 
 def openFile(url):
 	if os.path.splitext(url)[1]=='.pdf':
-    	text = pdft.read_pdf_PDFMINER(url)
-    	print('filename extension: .pdf')   
+		text = pdft.read_pdf_PDFMINER(url)
+		print('filename extension: .pdf')   
 	elif os.path.splitext(url)[1]=='.pptx':
-    	text = pptt.read_ppt(url)
-    	print('filename extenstion: .pptx')
+		text = pptt.read_ppt(url)
+		print('filename extenstion: .pptx')
 	else:
-    	print("error: unknown filename extension")
+		print("error: unknown filename extension")
 	return text
 
 def cleanText(text):
@@ -52,9 +52,9 @@ def getWords(text):
 				noun_fo.append(i[0])
 	vocab_ko = sorted(vocab_ko.items(), key =lambda x: x[1], reverse=True)
 	# print(vocab_ko)
-	return vocab_ko
+	return vocab_ko, noun_nn, noun_fo
 
-def writeResult(vocab):
+def writeResult(vocab_ko, noun_nn, noun_fo):
 	# mecab
 	f = open("/home/yunjung/capstone_kor/mecab_nn.txt", 'w')
 	f.write(", ".join(noun_nn))
@@ -72,7 +72,6 @@ if __name__ == '__main__':
 	text = openFile(url)
 	clean_txt = cleanText(text)
 	stopset = getStopwords()
-	vocab = getWords(clean_txt)
-	writeResult(vocab)
+	vocab, noun_nn, noun_fo = getWords(clean_txt)
+	writeResult(vocab, noun_nn, noun_fo)
 	print("Success")
-

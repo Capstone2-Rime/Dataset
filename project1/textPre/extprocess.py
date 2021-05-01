@@ -1,7 +1,7 @@
 # 들어오는 텍스트: 하나의string
 # 띄어쓰기, 맞춤법은 옳다고 가정하겠음 (강의/회의자료, 사전자료이기 때문)
 # 영어 두글자 이하 지우기 /url, email 삭제
-from hanspell import spell_checker
+# from hanspell import spell_checker
 import re
 #text = '마춤뻡 검사가 시원찬은것 같아요.'
 #result = spell_checker.check(text).checked
@@ -37,8 +37,8 @@ def clean_txt(text):
     text = re.sub(r'\s+$', '', text)#from end
     return text
 
-def check_spell(text):
-    spelled_sent = spell_checker.check(text)
-    text = spelled_sent.checked
-    return text
+#def check_spell(text):
+#    spelled_sent = spell_checker.check(text)
+#    text = spelled_sent.checked
+#    return text
 
