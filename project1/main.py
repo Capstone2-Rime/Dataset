@@ -3,62 +3,76 @@ import textPre.ppttxt as pptt
 import textPre.extprocess as prc
 import os
 import time
-#from konlpy.tag import Mecab
-#from konlpy.tag import Okt
-#from kiwipiepy import Kiwi, Option
-#start = time.time()
-#mecab = Mecab()
-#okt = Okt()
-#kiwi = Kiwi()
+import pickle
+import pandas as pd
+from konlpy.tag import Mecab
+import json
+# start = time.time()
+mecab = Mecab()
 
-# url은 언젠가 업로드되는 주소로 바뀔 것임!
-# url = 'C:/Users/이윤정/Desktop/캡디/참고파일/3조 최종데모 발표 자료.pptx'
-# url = 'C:/Users/이윤정/Desktop/캡디/사이보그가 되다.pdf'
-url = 'C:/Users/이윤정/Desktop/캡디/문헌정보강의.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/생명과학.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/예술.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/캡디라임4주발표.pptx'
-# url = 'C:/Users/이윤정/Desktop/캡디/경영.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/광홍_논문.pdf'
-# url = 'C:/Users/이윤정/Desktop/캡디/광홍_강의자료.pdf'
-# url = '/media/sf_Share/testpdf.pdf'
+def openFile(url):
+	if os.path.splitext(url)[1]=='.pdf':
+    	text = pdft.read_pdf_PDFMINER(url)
+    	print('filename extension: .pdf')   
+	elif os.path.splitext(url)[1]=='.pptx':
+    	text = pptt.read_ppt(url)
+    	print('filename extenstion: .pptx')
+	else:
+    	print("error: unknown filename extension")
+	return text
 
-if os.path.splitext(url)[1]=='.pdf':
-    text = pdft.read_pdf_PDFMINER(url)
-    #print('filename extension: .pdf')   
-elif os.path.splitext(url)[1]=='.pptx':
-    text = pptt.read_ppt(url)
-    #print('filename extenstion: .pptx')
-else:
-    print("error: unknown filename extension")
+def cleanText(text):
+	t = prc.clean_txt(text)
+	# t = prc.check_spell(text)
+	return t
 
-text = prc.clean_txt(text)
-#text = prc.check_spell(text)
+def getStopwords():
+	stopfile = '/media/sf_Share/stopword_ko.csv'
+	stopdata = pd.read_csv(stopfile)
+	stopset = list(stopdata.stopword)
+	# print(list(stopdata.stopword))
+	return stopset
 
-#위치는 나중에 변경할 것
-f = open("C:/Users/이윤정/Desktop/new.txt", 'w', encoding='UTF-8')
-f.write(text)
-f.close()
+def getWords(text):
+	pos = mecab.pos(text)
+	vocab_ko = {}
+	noun_nn = []
+	noun_fo = []
+	tag_nn = ['NNG','NNP']
+	for i in pos:
+		if i[1] in tag_nn:
+			if i[0] in stopset:
+				continue
+			noun_nn.append(i[0])
+			if i[0] not in vocab_ko:
+				vocab_ko[i[0]] = 0
+			vocab_ko[i[0]] += 1
+		elif i[1]=='SL':
+			if len(i[0])>2:
+				noun_fo.append(i[0])
+	vocab_ko = sorted(vocab_ko.items(), key =lambda x: x[1], reverse=True)
+	# print(vocab_ko)
+	return vocab_ko
 
+def writeResult(vocab):
+	# mecab
+	f = open("/home/yunjung/capstone_kor/mecab_nn.txt", 'w')
+	f.write(", ".join(noun_nn))
+	f.close()
+	f = open("/home/yunjung/capstone_kor/mecab_fo.txt", 'w')
+	f.write(', '.join(noun_fo))
+	f.close()
+	f = open("/home/yunjung/capstone_kor/vocab_rank.txt", 'w')
+	for k, v in vocab_ko:
+		f.write(str(k) + ' : ' + str(v)+'\n')
+	f.close()
 
-#print(mecab.pos(text))
-#print(okt.pos(text))
-# mecab
-# f = open("/home/yunjung/capstone_kor/new.txt", 'w')
-# f.write('\n'.join(mecab.morphs(text)))
-# f.write('time :'+str(time.time()-start))
-# f.close()
-# twt
-# f = open("/home/yunjung/capstone_kor/new_twt.txt", 'w')
-# f.write('\n'.join(okt.morphs(text)))
-# f.write('\ntime :'+str(time.time()-start))
-# print('time :', time.time()-start)
-# f.close()
-# kiwi
-# kiwi.prepare()
-# a = kiwi.analyze(text)
-# print(a)
-# f = open("/home/yunjung/capstone_kor/new_kiwi.txt", 'w')
-# f.write('time :'+str(time.time()-start))
-# print('time:', time.time()-start)
-# f.close()
+if __name__ == '__main__':
+	url = '/media/sf_Share/testpdf.pdf'
+	text = openFile(url)
+	clean_txt = cleanText(text)
+	stopset = getStopwords()
+	vocab = getWords(clean_txt)
+	writeResult(vocab)
+	print("Success")
+
