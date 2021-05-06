@@ -1,6 +1,7 @@
 import textPre.pdftxt as pdft
 import textPre.ppttxt as pptt
 import textPre.extprocess as prc
+import textPre.lrword as lrw
 import os
 import time
 import pickle
@@ -50,45 +51,25 @@ def getWords(text, stopset):
 			vocab_ko[w] = 0
 		vocab_ko[w] += 1
 	vocab_ko = sorted(vocab_ko.items(), key =lambda x: x[1], reverse=True)
-	
-	#vocab_hr = []
-	#vocab_lr = []
-	#for k, v  in vocab_ko:
-	#	if v>4:
-	#		vocab_hr.append(k)
-	#	else:
-	#		vocab_lr.append(l)
+
 	vocab_hr = [k for k, v in vocab_ko if v>4]
 	vocab_lr = [k for k, v in vocab_ko if v<=4]
 
 	return vocab_ko, vocab_hr, vocab_lr, noun_fo
 
-def writeResult(vocab, vocab_hr, vocab_lr, noun_fo):
-	# mecab
-	#f = open("/home/yunjung/capstone_kor/noun_nn.txt", 'w')
-	#f.write(", ".join(noun_nn))
-	#f.close()
+def writeResult(vocab_fin, noun_fo):
 	# English
 	f = open("/home/yunjung/capstone_kor/noun_fo.txt", 'w')
 	f.write(', '.join(noun_fo))
 	f.close()
-	# Vocab_rank
-	f = open("/home/yunjung/capstone_kor/vocab_rank.txt", 'w')
-	for k, v in vocab:
-		f.write(str(k)+' : '+str(v)+'\n')
-	f.close()
-	# High rank
-	f = open("/home/yunjung/capstone_kor/vocab_highrank.txt", 'w')
+	# Vocab_Fin
+	f = open("/home/yunjung/capstone_kor/vocab_fin.txt", 'w')
 	f.write("\n".join(vocab_hr))
 	f.close()
-	# Low rank
-	f = open("/home/yunjung/capstone_kor/vocab_lowrank.txt", 'w')
-	f.write(", ".join(vocab_lr))
-	f.close()
 	# stt전송형식
-	#f = open("/home/yunjung/capstone_kor/word_request.txt", 'w')
-	#f.write(',\n'.join(M))
-	#f.close()
+	# f = open("/home/yunjung/capstone_kor/word_request.txt", 'w')
+	# f.write(',\n'.join(M))
+	# f.close()
 
 if __name__ == '__main__':
 	url = '/media/sf_Share/예술.pdf'
@@ -96,15 +77,15 @@ if __name__ == '__main__':
 	clean_txt = cleanText(text)
 	stopset = getStopwords()
 	vocab, vocab_hr, vocab_lr, noun_fo = getWords(clean_txt, stopset)
+	vocab_lr_new = lrw.extractWord(vocab_lr)
+	vocab_fin = vocab_hr + vocab_lr_new
+	# M = []
+	# for i in vocab:
+	# 	 M.append('{ \"value\" : \"'+i[0]+'\", "boost" :'+str(i[1])+' }')
+	# json.dumps(M)
+	# print(M)
+	writeResult(vocab_fin, noun_fo)
 
-	#M = []
-	#for i in vocab:
-	#	M.append('{ \"value\" : \"'+i[0]+'\", "boost" :'+str(i[1])+' }')
-	#json.dumps(M)
-	#print(M)
-
-	writeResult(vocab, vocab_hr, vocab_lr, noun_fo)
-			
 	print("Success")
 
 
