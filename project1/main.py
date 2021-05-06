@@ -27,7 +27,7 @@ def cleanText(text):
 	return t
 
 def getStopwords():
-	stopfile = '/media/sf_Share/stopword_ko.csv'
+	stopfile = '/home/yjlee/Desktop/stopword_ko.csv'
 	stopdata = pd.read_csv(stopfile, encoding='utf-8')
 	stopset = list(stopdata.stopword)
 	#print(list(stopdata.stopword))
@@ -50,41 +50,48 @@ def getWords(text, stopset):
 		if w not in vocab_ko:
 			vocab_ko[w] = 0
 		vocab_ko[w] += 1
-	vocab_ko = sorted(vocab_ko.items(), key =lambda x: x[1], reverse=True)
+	vocab = sorted(vocab_ko.items(), key =lambda x: x[1], reverse=True)
 
-	vocab_hr = [k for k, v in vocab_ko if v>4]
-	vocab_lr = [k for k, v in vocab_ko if v<=4]
+	vocab_hr = [k for k, v in vocab if v>4]
+	vocab_lr = [k for k, v in vocab if v<=4]
 
-	return vocab_ko, vocab_hr, vocab_lr, noun_fo
+	return vocab_ko, vocab, vocab_hr, vocab_lr, noun_fo
 
-def writeResult(vocab_fin, noun_fo):
+def writeResult(vocab_fin, noun_fo, M):
+	loc = "/home/yjlee/Desktop/"
 	# English
-	f = open("/home/yunjung/capstone_kor/noun_fo.txt", 'w')
+	f = open(loc + "noun_fo.txt", 'w')
 	f.write(', '.join(noun_fo))
 	f.close()
 	# Vocab_Fin
-	f = open("/home/yunjung/capstone_kor/vocab_fin.txt", 'w')
-	f.write("\n".join(vocab_hr))
+	f = open(loc + "vocab_fin.txt", 'w')
+	f.write("\n".join(vocab_fin))
 	f.close()
 	# stt전송형식
-	# f = open("/home/yunjung/capstone_kor/word_request.txt", 'w')
-	# f.write(',\n'.join(M))
-	# f.close()
+	f = open(loc + "w_request.txt", 'w')
+	f.write(',\n'.join(M))
+	f.close()
 
 if __name__ == '__main__':
-	url = '/media/sf_Share/예술.pdf'
-	text = openFile(url)
+	loc = '/home/yjlee/Desktop/lecNote/'
+	url = loc + 'korean.pdf'
+
+	text = openFile(url)	
 	clean_txt = cleanText(text)
 	stopset = getStopwords()
-	vocab, vocab_hr, vocab_lr, noun_fo = getWords(clean_txt, stopset)
+	vocab_ko, vocab, vocab_hr, vocab_lr, noun_fo = getWords(clean_txt, stopset)
+
 	vocab_lr_new = lrw.extractWord(vocab_lr)
+	# print(vocab_lr_new)
 	vocab_fin = vocab_hr + vocab_lr_new
-	# M = []
-	# for i in vocab:
-	# 	 M.append('{ \"value\" : \"'+i[0]+'\", "boost" :'+str(i[1])+' }')
-	# json.dumps(M)
-	# print(M)
-	writeResult(vocab_fin, noun_fo)
+	print(type(vocab_ko))
+	M = []
+	for i in vocab_fin:
+		M.append('{ \"value\" : \"'+ i +' }')
+		#M.append('{ \"value\" : \"'+ i +'\", "boost" :' + str(vocab_ko[i]) + ' }')
+	#json.dumps(M)
+	
+	writeResult(vocab_fin, noun_fo, M)
 
 	print("Success")
 
