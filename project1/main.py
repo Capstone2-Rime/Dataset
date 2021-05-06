@@ -27,51 +27,84 @@ def cleanText(text):
 
 def getStopwords():
 	stopfile = '/media/sf_Share/stopword_ko.csv'
-	stopdata = pd.read_csv(stopfile)
+	stopdata = pd.read_csv(stopfile, encoding='utf-8')
 	stopset = list(stopdata.stopword)
-	# print(list(stopdata.stopword))
+	#print(list(stopdata.stopword))
 	return stopset
 
-def getWords(text):
+def getWords(text, stopset):
 	mecab = Mecab()
 	pos = mecab.pos(text)
+	
 	vocab_ko = {}
+	noun_nn_pre = []
 	noun_nn = []
 	noun_fo = []
+	
 	tag_nn = ['NNG','NNP']
-	for i in pos:
-		if i[1] in tag_nn:
-			if i[0] in stopset:
-				continue
-			noun_nn.append(i[0])
-			if i[0] not in vocab_ko:
-				vocab_ko[i[0]] = 0
-			vocab_ko[i[0]] += 1
-		elif i[1]=='SL':
-			if len(i[0])>2:
-				noun_fo.append(i[0])
+	noun_nn_pre = [w[0] for w in pos if w[1] in tag_nn]
+	noun_fo = [w[0] for w in pos if w[1]=='SL']
+	noun_nn = [word for word in noun_nn_pre if word not in stopset]
+	for w in noun_nn:
+		if w not in vocab_ko:
+			vocab_ko[w] = 0
+		vocab_ko[w] += 1
 	vocab_ko = sorted(vocab_ko.items(), key =lambda x: x[1], reverse=True)
-	# print(vocab_ko)
-	return vocab_ko, noun_nn, noun_fo
+	
+	#vocab_hr = []
+	#vocab_lr = []
+	#for k, v  in vocab_ko:
+	#	if v>4:
+	#		vocab_hr.append(k)
+	#	else:
+	#		vocab_lr.append(l)
+	vocab_hr = [k for k, v in vocab_ko if v>4]
+	vocab_lr = [k for k, v in vocab_ko if v<=4]
 
-def writeResult(vocab_ko, noun_nn, noun_fo):
+	return vocab_ko, vocab_hr, vocab_lr, noun_fo
+
+def writeResult(vocab, vocab_hr, vocab_lr, noun_fo):
 	# mecab
-	f = open("/home/yunjung/capstone_kor/mecab_nn.txt", 'w')
-	f.write(", ".join(noun_nn))
-	f.close()
-	f = open("/home/yunjung/capstone_kor/mecab_fo.txt", 'w')
+	#f = open("/home/yunjung/capstone_kor/noun_nn.txt", 'w')
+	#f.write(", ".join(noun_nn))
+	#f.close()
+	# English
+	f = open("/home/yunjung/capstone_kor/noun_fo.txt", 'w')
 	f.write(', '.join(noun_fo))
 	f.close()
+	# Vocab_rank
 	f = open("/home/yunjung/capstone_kor/vocab_rank.txt", 'w')
-	for k, v in vocab_ko:
-		f.write(str(k) + ' : ' + str(v)+'\n')
+	for k, v in vocab:
+		f.write(str(k)+' : '+str(v)+'\n')
 	f.close()
+	# High rank
+	f = open("/home/yunjung/capstone_kor/vocab_highrank.txt", 'w')
+	f.write("\n".join(vocab_hr))
+	f.close()
+	# Low rank
+	f = open("/home/yunjung/capstone_kor/vocab_lowrank.txt", 'w')
+	f.write(", ".join(vocab_lr))
+	f.close()
+	# stt전송형식
+	#f = open("/home/yunjung/capstone_kor/word_request.txt", 'w')
+	#f.write(',\n'.join(M))
+	#f.close()
 
 if __name__ == '__main__':
-	url = '/media/sf_Share/testpdf.pdf'
+	url = '/media/sf_Share/예술.pdf'
 	text = openFile(url)
 	clean_txt = cleanText(text)
 	stopset = getStopwords()
-	vocab, noun_nn, noun_fo = getWords(clean_txt)
-	writeResult(vocab, noun_nn, noun_fo)
+	vocab, vocab_hr, vocab_lr, noun_fo = getWords(clean_txt, stopset)
+
+	#M = []
+	#for i in vocab:
+	#	M.append('{ \"value\" : \"'+i[0]+'\", "boost" :'+str(i[1])+' }')
+	#json.dumps(M)
+	#print(M)
+
+	writeResult(vocab, vocab_hr, vocab_lr, noun_fo)
+			
 	print("Success")
+
+
