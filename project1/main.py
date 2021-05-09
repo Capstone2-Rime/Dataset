@@ -54,14 +54,15 @@ def getWords(text, stopset):
 
 	vocab_hr = [k for k, v in vocab if v>4]
 	vocab_lr = [k for k, v in vocab if v<=4]
+	
+	pos = [w[0] for w in pos]
+	return vocab_ko, vocab, vocab_hr, vocab_lr, noun_fo, noun_nn, pos
 
-	return vocab_ko, vocab, vocab_hr, vocab_lr, noun_fo
-
-def writeResult(vocab_fin, noun_fo, M):
+def writeResult(vocab_fin, noun_nn, M, pos):
 	loc = "/home/yjlee/Desktop/"
-	# English
-	f = open(loc + "noun_fo.txt", 'w')
-	f.write(', '.join(noun_fo))
+	# noun_nn
+	f = open(loc + "noun_nn.txt", 'w')
+	f.write(', '.join(noun_nn))
 	f.close()
 	# Vocab_Fin
 	f = open(loc + "vocab_fin.txt", 'w')
@@ -71,27 +72,39 @@ def writeResult(vocab_fin, noun_fo, M):
 	f = open(loc + "w_request.txt", 'w')
 	f.write(',\n'.join(M))
 	f.close()
+	# pos
+	f = open(loc +"raw_pos.txt", 'w')
+	f.write(', '.join(pos))
+	f.close()
 
 if __name__ == '__main__':
+
+	# DIR WHERE FILE EXISTS
 	loc = '/home/yjlee/Desktop/lecNote/'
-	url = loc + 'korean.pdf'
+	
+	# line86 : will be deleted soon
+	url = loc + 'art.pdf'
+	
+	# NO NEED TO INPUT FILENAME, ONLY DIR NAME REQUIRED
+	# filelist = os.listdir(loc)
+	# url = loc + filelist[0]	
 
 	text = openFile(url)	
 	clean_txt = cleanText(text)
 	stopset = getStopwords()
-	vocab_ko, vocab, vocab_hr, vocab_lr, noun_fo = getWords(clean_txt, stopset)
+	vocab_ko, vocab, vocab_hr, vocab_lr, noun_fo, noun_nn, pos = getWords(clean_txt, stopset)
 
 	vocab_lr_new = lrw.extractWord(vocab_lr)
 	# print(vocab_lr_new)
 	vocab_fin = vocab_hr + vocab_lr_new
-	print(type(vocab_ko))
+	# print(type(vocab_ko))
 	M = []
 	for i in vocab_fin:
-		M.append('{ \"value\" : \"'+ i +' }')
+		M.append('{ \"value\" : \"'+ i +'\" }')
 		#M.append('{ \"value\" : \"'+ i +'\", "boost" :' + str(vocab_ko[i]) + ' }')
 	#json.dumps(M)
 	
-	writeResult(vocab_fin, noun_fo, M)
+	writeResult(vocab_fin, noun_nn, M, pos)
 
 	print("Success")
 
