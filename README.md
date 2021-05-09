@@ -12,7 +12,8 @@ $ sudo apt-get install g++ openjdk-8-jdk python3-dev python3-pip curl
 $ sudo apt-get install python3-pandas
 # Install pptx, pdf processor
 $ pip3 install python-pptx
-$ pip3 install pdfminer
+$ sudo apt-get update -y
+$ sudo apt-get install -y python3-pdfminer
 ```
 #### Install KoNLPy
 ```python
