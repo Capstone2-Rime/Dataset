@@ -2,6 +2,7 @@ import textPre.pdftxt as pdft
 import textPre.ppttxt as pptt
 import textPre.extprocess as prc
 import textPre.lrword as lrw
+import textPre.makejson as mjson
 import os
 import time
 import pickle
@@ -56,26 +57,23 @@ def getWords(text, stopset):
 	vocab_lr = [k for k, v in vocab if v<=4]
 	
 	pos = [w[0] for w in pos]
-	return vocab_ko, vocab, vocab_hr, vocab_lr, noun_fo, noun_nn, pos
+	return pos, vocab_hr, vocab_lr, noun_fo
 
-def writeResult(vocab_fin, noun_nn, M, pos):
+def writeResult(pos, vocab_fin, M):
 	loc = "/home/yjlee/Desktop/"
-	# noun_nn
-	f = open(loc + "noun_nn.txt", 'w')
-	f.write(', '.join(noun_nn))
-	f.close()
-	# Vocab_Fin
-	f = open(loc + "vocab_fin.txt", 'w')
-	f.write("\n".join(vocab_fin))
-	f.close()
-	# stt전송형식- no weight
-	f = open(loc + "w_request.txt", 'w')
-	f.write(', '.join(M))
-	f.close()
-	# pos
+	# pos: raw words from uploaded file
 	f = open(loc +"raw_pos.txt", 'w')
 	f.write(', '.join(pos))
 	f.close()
+	# Vocab_Fin : stt에 전송되는 list
+	f = open(loc + "vocab_fin.txt", 'w')
+	f.write("\n".join(vocab_fin))
+	f.close()
+	# stt전송형식모양- no weight
+	f = open(loc + "w_request.txt", 'w')
+	f.write(', '.join(M))
+	f.close()
+	
 
 if __name__ == '__main__':
 
@@ -92,23 +90,22 @@ if __name__ == '__main__':
 	text = openFile(url)	
 	clean_txt = cleanText(text)
 	stopset = getStopwords()
-	vocab_ko, vocab, vocab_hr, vocab_lr, noun_fo, noun_nn, pos = getWords(clean_txt, stopset)
+	pos, vocab_hr, vocab_lr, noun_fo = getWords(clean_txt, stopset)
 
+	# for low rank
 	vocab_lr_new = lrw.extractWord(vocab_lr)
-	# print(vocab_lr_new)
+	# final word dataset
 	vocab_fin = vocab_hr + vocab_lr_new
-	# print(type(vocab_ko))
+
 	M = []
 	for i in vocab_fin:
-		M.append('{ \"'+ i +'\" }')
-		# WEIGHT
-		# M.append('{ \"phrases\" : \"'+ i +'\", "boost" :' + str(vocab_ko[i]) + ' }')
-
+		M.append('{ \"phrases\" : \"'+ i +'\", "boost" :' + '10' + ' }')
 	#json.dumps(M)
 	
-	writeResult(vocab_fin, noun_nn, M, pos)
-	
-	print(vocab_fin)
+	# textfile에 쓰기: rawdata, finaldata, 전송형식data(with 가중치)
+	writeResult(pos, vocab_fin, M)
+	# json파일 생성
+	mjson.makejson("/home/yjlee/Desktop/", vocab_fin)
 	
 	print("Success")
 
