@@ -68,9 +68,9 @@ def writeResult(vocab_fin, noun_nn, M, pos):
 	f = open(loc + "vocab_fin.txt", 'w')
 	f.write("\n".join(vocab_fin))
 	f.close()
-	# stt전송형식
+	# stt전송형식- no weight
 	f = open(loc + "w_request.txt", 'w')
-	f.write(',\n'.join(M))
+	f.write(', '.join(M))
 	f.close()
 	# pos
 	f = open(loc +"raw_pos.txt", 'w')
@@ -100,12 +100,16 @@ if __name__ == '__main__':
 	# print(type(vocab_ko))
 	M = []
 	for i in vocab_fin:
-		M.append('{ \"value\" : \"'+ i +'\" }')
-		#M.append('{ \"value\" : \"'+ i +'\", "boost" :' + str(vocab_ko[i]) + ' }')
+		M.append('{ \"'+ i +'\" }')
+		# WEIGHT
+		# M.append('{ \"phrases\" : \"'+ i +'\", "boost" :' + str(vocab_ko[i]) + ' }')
+
 	#json.dumps(M)
 	
 	writeResult(vocab_fin, noun_nn, M, pos)
-
+	
+	print(vocab_fin)
+	
 	print("Success")
 
 
