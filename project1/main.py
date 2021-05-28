@@ -56,8 +56,11 @@ def getWords(text, stopset):
 	vocab_hr = [k for k, v in vocab if v>4]
 	vocab_lr = [k for k, v in vocab if v<=4]
 	
+	temp = [w for w in noun_nn_pre if len(w)>1] + noun_fo
+	afterset = list(set(temp))
+	
 	pos = [w[0] for w in pos]
-	return pos, vocab_hr, vocab_lr, noun_fo
+	return pos, vocab_hr, vocab_lr, noun_fo, afterset
 
 def writeResult(pos, vocab_fin, M):
 	loc = "/home/yjlee/Desktop/"
@@ -73,7 +76,13 @@ def writeResult(pos, vocab_fin, M):
 	f = open(loc + "w_request.txt", 'w')
 	f.write(', '.join(M))
 	f.close()
-	
+
+def writeAfterset(afterset):
+	loc = "/home/yjlee/Desktop/"
+	f = open(loc +"afterset.txt", 'w')
+	f.write(', '.join(afterset))
+	f.close()
+	print('Afterset Created')
 
 if __name__ == '__main__':
 
@@ -90,8 +99,8 @@ if __name__ == '__main__':
 	text = openFile(url)	
 	clean_txt = cleanText(text)
 	stopset = getStopwords()
-	pos, vocab_hr, vocab_lr, noun_fo = getWords(clean_txt, stopset)
-
+	pos, vocab_hr, vocab_lr, noun_fo, afterset = getWords(clean_txt, stopset)
+	print(afterset)
 	# for low rank
 	vocab_lr_new = lrw.extractWord(vocab_lr)
 	# final word dataset
@@ -103,10 +112,13 @@ if __name__ == '__main__':
 	#json.dumps(M)
 	
 	# textfile에 쓰기: rawdata, finaldata, 전송형식data(with 가중치)
-	writeResult(pos, vocab_fin, M)
+	# writeResult(pos, vocab_fin, M)
+	
 	# json파일 생성
 	mjson.makejson("/home/yjlee/Desktop/", vocab_fin)
-	
+	# afterset text file
+	writeAfterset(afterset)
+		
 	print("Success")
 
 
